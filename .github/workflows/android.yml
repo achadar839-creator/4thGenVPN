@@ -17,10 +17,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Accept Android SDK Licenses
-        run: yes | sdkmanager --licenses || true
-        shell: bash
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
@@ -30,7 +26,6 @@ jobs:
             chmod +x gradlew
             ./gradlew assembleDebug
           else
-            echo "Gradle wrapper missing, installing default..."
             gradle wrapper
             chmod +x gradlew
             ./gradlew assembleDebug
