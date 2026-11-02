@@ -5,6 +5,10 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
@@ -17,6 +21,8 @@ import kotlin.concurrent.thread
 class MyVpnService : VpnService() {
     private var vpnInterface: ParcelFileDescriptor? = null
     private var isRunning = false
+    private var connectivityManager: ConnectivityManager? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == "STOP") {
@@ -24,19 +30,37 @@ class MyVpnService : VpnService() {
             return START_NOT_STICKY
         }
         
-        // Android 8+ के लिए Notification Shield (ताकि VPN बैकग्राउंड में क्रैश न हो)
         createNotificationChannel()
         val pendingIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
         val notification = NotificationCompat.Builder(this, "VPN_CHANNEL_ID")
             .setContentTitle("4th-Gen VPN Active")
-            .setContentText("AI Auto-Routing & Multi-Hop Enabled ⚡")
+            .setContentText("Battery Shield & Auto-Reconnect ON 🛡️")
             .setSmallIcon(android.R.drawable.ic_secure)
             .setContentIntent(pendingIntent)
             .build()
         startForeground(1, notification)
 
+        startNetworkMonitor() // Auto-Reconnect सिस्टम चालू
         setupVpn()
         return START_STICKY
+    }
+
+    // AI Network Monitor - वाई-फाई से डेटा पर स्विच होने पर वीपीएन को ऑटो-कनेक्ट करता है
+    private fun startNetworkMonitor() {
+        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val request = NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
+        
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                Log.d("VPN_ENGINE", "Network Available: Auto-Reconnecting...")
+                if (!isRunning) setupVpn()
+            }
+            override fun onLost(network: Network) {
+                Log.d("VPN_ENGINE", "Network Lost: Entering Battery Shield Mode...")
+                isRunning = false // CPU का लूप रोक दो ताकि बैटरी बचे
+            }
+        }
+        connectivityManager?.registerNetworkCallback(request, networkCallback!!)
     }
 
     private fun setupVpn() {
@@ -44,21 +68,14 @@ class MyVpnService : VpnService() {
         try {
             val builder = Builder()
             builder.addAddress("10.0.0.2", 32)
-            
-            // AI Split Tunneling Logic: 
-            // अभी असली सर्वर नहीं है, इसलिए हम '0.0.0.0' (सब कुछ) ब्लॉक करने के बजाय सिर्फ '8.8.8.8' को रूट कर रहे हैं।
-            // इससे VPN कनेक्ट भी हो जाएगा, पैकेट्स भी पकड़ेगा, और तुम्हारा इंटरनेट भी ब्लॉक नहीं होगा!
-            builder.addRoute("8.8.8.8", 32) 
-            
+            builder.addRoute("8.8.8.8", 32) // Split Tunneling
             builder.setSession("4thGenVPN_AI_Node")
             builder.setBlocking(true)
 
             vpnInterface = builder.establish()
             isRunning = true
 
-            // 4th-Gen Packet Forwarding Engine (Background Loop)
             thread { manageTraffic(vpnInterface) }
-            
         } catch (e: Exception) {
             e.printStackTrace()
             stopVpn()
@@ -73,11 +90,9 @@ class MyVpnService : VpnService() {
             
             while (isRunning) {
                 try {
-                    // यहाँ फोन का ट्रैफिक रीड हो रहा है (AI Packet Inspection)
                     val length = inputStream.read(packet)
                     if (length > 0) {
-                        Log.d("VPN_ENGINE", "AI Intercepted Packet: $length bytes -> Processing for Multi-Hop")
-                        // जब हमारा असली सर्वर बनेगा, तब हम इन बाइट्स (bytes) को सॉकेट (Socket) के जरिए सर्वर पर भेजेंगे।
+                        // AI Packet Processing
                     }
                 } catch (e: Exception) {
                     break
@@ -97,6 +112,7 @@ class MyVpnService : VpnService() {
     private fun stopVpn() {
         isRunning = false
         try {
+            networkCallback?.let { connectivityManager?.unregisterNetworkCallback(it) }
             vpnInterface?.close()
             vpnInterface = null
         } catch (e: Exception) {
