@@ -1,39 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0F172A"
-    android:gravity="center"
-    android:orientation="vertical"
+    android:background="#0F0F13"
     android:padding="24dp">
 
     <TextView
+        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="4TH-GEN ULTRA VPN"
-        android:textColor="#38BDF8"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:letterSpacing="0.1" />
-
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Status: Disconnected"
-        android:textColor="#94A3B8"
-        android:textSize="16sp" />
-
-    <Button
-        android:id="@+id/btnConnect"
-        android:layout_width="200dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="48dp"
-        android:backgroundTint="#0284C7"
-        android:text="CONNECT"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="4TH-GEN VPN"
+        android:textColor="#39FF14"
+        android:textSize="26sp"
         android:textStyle="bold" />
 
-</LinearLayout>
+    <!-- यह आ गया तुम्हारा सेटिंग्स/मेन्यू बटन -->
+    <TextView
+        android:id="@+id/btnSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="18dp"
+        android:text="⚙️"
+        android:textSize="28sp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+    <!-- Server Selector -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnSelectServer"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/tvTitle"
+        android:layout_marginTop="40dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardBackgroundColor="#1E1E24"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp">
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent" android:paddingHorizontal="20dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🌍 Location" android:textColor="#888888" android:textSize="14sp" android:layout_centerVertical="true"/>
+            <TextView android:id="@+id/tvCurrentServer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Optimal Server (Auto)" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold" android:layout_alignParentEnd="true" android:layout_centerVertical="true"/>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Glowing Quantum Button -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnConnect"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerInParent="true"
+        app:cardBackgroundColor="#1E1E24"
+        app:cardCornerRadius="100dp"
+        app:cardElevation="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground">
+        <TextView android:id="@+id/tvConnectState" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="CONNECT" android:textColor="#FFFFFF" android:textSize="22sp" android:textStyle="bold" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Stats Panel -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="30dp"
+        app:cardBackgroundColor="#1E1E24"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="5dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="20dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="PING" android:textColor="#888888" android:textSize="14sp" />
+                <TextView android:id="@+id/tvPing" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="--" android:textColor="#39FF14" android:textSize="20sp" android:textStyle="bold" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SPEED" android:textColor="#888888" android:textSize="14sp" />
+                <TextView android:id="@+id/tvSpeed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="--" android:textColor="#39FF14" android:textSize="20sp" android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>

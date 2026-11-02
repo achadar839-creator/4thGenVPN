@@ -37,3 +37,5 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }
+dependencies { implementation 'com.wireguard.android:tunnel:1.0.20231018' }
+dependencies { implementation 'com.wireguard.android:tunnel:1.0.20231018' }

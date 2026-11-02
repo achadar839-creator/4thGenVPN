@@ -35,6 +35,8 @@ class MyVpnService : VpnService() {
     private var lastTxBytes = TrafficStats.getTotalTxBytes()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val selectedCountry = intent?.getStringExtra("SELECTED_COUNTRY") ?: "Optimal Server (Auto)"
+        notificationBuilder.setContentTitle("Connected to $selectedCountry")
         if (intent?.action == "STOP") {
             stopVpn()
             return START_NOT_STICKY
@@ -45,11 +47,17 @@ class MyVpnService : VpnService() {
         
         val pendingIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
         
+        // 1. VPN को नोटिफिकेशन से बंद करने का कमांड
+        val stopIntent = Intent(this, MyVpnService::class.java).apply { action = "STOP" }
+        val stopPendingIntent = PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_IMMUTABLE)
+        
+        // 2. लाइव स्पीड और डिसकनेक्ट बटन वाला नोटिफिकेशन
         notificationBuilder = NotificationCompat.Builder(this, "VPN_CHANNEL_ID")
             .setContentTitle("Connected to Singapore")
             .setContentText("↓ 0.00 B/s | ↑ 0.00 B/s")
             .setSmallIcon(android.R.drawable.ic_secure)
             .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "DISCONNECT", stopPendingIntent)
             .setOnlyAlertOnce(true)
             
         startForeground(1, notificationBuilder.build())
@@ -159,6 +167,8 @@ class MyVpnService : VpnService() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        
+        // डिसकनेक्ट होने पर नोटिफिकेशन हटा दो
         stopForeground(true)
         stopSelf()
     }
