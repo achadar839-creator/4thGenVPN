@@ -2,31 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
     android:orientation="vertical"
+    android:padding="20dp"
     android:gravity="center"
-    android:padding="24dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="4TH-GEN GAMING VPN"
-        android:textColor="#00FF66"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
+    android:background="#121212">
 
     <Button
         android:id="@+id/btnSelectCountry"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="Select Country / Server"
-        android:backgroundTint="#1F1F1F"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="15dp"
+        android:text="Select Country / Server" />
 
-    <Button
     <Button
         android:id="@+id/btn2xBridge"
         android:layout_width="match_parent"
@@ -35,14 +22,22 @@
         android:text="🚀 2X ASIA BRIDGE (SG + JP)"
         android:backgroundTint="#FF5722"
         android:textColor="#FFFFFF" />
+
+    <Button
         android:id="@+id/btnConnect"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="CONNECT VPN"
-        android:backgroundTint="#00FF66"
-    <Button android:id="@+id/btnDisconnect" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="DISCONNECT VPN" android:backgroundTint="#FF3333" android:textColor="#FFFFFF" android:textStyle="bold" />
-        android:textColor="#000000"
-        android:textStyle="bold"
-        android:textSize="18sp"/>
+        android:layout_marginBottom="15dp"
+        android:text="Connect"
+        android:backgroundTint="#4CAF50"
+        android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/btnDisconnect"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Disconnect"
+        android:backgroundTint="#F44336"
+        android:textColor="#FFFFFF" />
 
 </LinearLayout>
