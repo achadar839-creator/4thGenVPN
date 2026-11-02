@@ -9,8 +9,11 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.TrafficStats
 import android.net.VpnService
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -23,6 +26,13 @@ class MyVpnService : VpnService() {
     private var isRunning = false
     private var connectivityManager: ConnectivityManager? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    
+    private lateinit var notificationManager: NotificationManager
+    private lateinit var notificationBuilder: NotificationCompat.Builder
+    private val updateHandler = Handler(Looper.getMainLooper())
+    
+    private var lastRxBytes = TrafficStats.getTotalRxBytes()
+    private var lastTxBytes = TrafficStats.getTotalTxBytes()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == "STOP") {
@@ -30,34 +40,70 @@ class MyVpnService : VpnService() {
             return START_NOT_STICKY
         }
         
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         createNotificationChannel()
+        
         val pendingIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
-        val notification = NotificationCompat.Builder(this, "VPN_CHANNEL_ID")
-            .setContentTitle("4th-Gen VPN Active")
-            .setContentText("Battery Shield & Auto-Reconnect ON 🛡️")
+        
+        notificationBuilder = NotificationCompat.Builder(this, "VPN_CHANNEL_ID")
+            .setContentTitle("Connected to Singapore")
+            .setContentText("↓ 0.00 B/s | ↑ 0.00 B/s")
             .setSmallIcon(android.R.drawable.ic_secure)
             .setContentIntent(pendingIntent)
-            .build()
-        startForeground(1, notification)
+            .setOnlyAlertOnce(true)
+            
+        startForeground(1, notificationBuilder.build())
 
-        startNetworkMonitor() // Auto-Reconnect सिस्टम चालू
+        startNetworkMonitor()
         setupVpn()
+        startLiveSpeedUpdate()
+        
         return START_STICKY
     }
 
-    // AI Network Monitor - वाई-फाई से डेटा पर स्विच होने पर वीपीएन को ऑटो-कनेक्ट करता है
+    private fun startLiveSpeedUpdate() {
+        updateHandler.post(object : Runnable {
+            override fun run() {
+                if (!isRunning) return
+                
+                val currentRxBytes = TrafficStats.getTotalRxBytes()
+                val currentTxBytes = TrafficStats.getTotalTxBytes()
+                
+                val rxSpeed = currentRxBytes - lastRxBytes
+                val txSpeed = currentTxBytes - lastTxBytes
+                
+                lastRxBytes = currentRxBytes
+                lastTxBytes = currentTxBytes
+                
+                val downStr = formatBytes(rxSpeed)
+                val upStr = formatBytes(txSpeed)
+                
+                notificationBuilder.setContentText("↓ $downStr/s | ↑ $upStr/s")
+                notificationManager.notify(1, notificationBuilder.build())
+                
+                updateHandler.postDelayed(this, 1000)
+            }
+        })
+    }
+
+    private fun formatBytes(bytes: Long): String {
+        return when {
+            bytes >= 1048576 -> String.format("%.2f MB", bytes / 1048576f)
+            bytes >= 1024 -> String.format("%.2f KB", bytes / 1024f)
+            else -> "$bytes B"
+        }
+    }
+
     private fun startNetworkMonitor() {
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val request = NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
         
         networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                Log.d("VPN_ENGINE", "Network Available: Auto-Reconnecting...")
                 if (!isRunning) setupVpn()
             }
             override fun onLost(network: Network) {
-                Log.d("VPN_ENGINE", "Network Lost: Entering Battery Shield Mode...")
-                isRunning = false // CPU का लूप रोक दो ताकि बैटरी बचे
+                isRunning = false
             }
         }
         connectivityManager?.registerNetworkCallback(request, networkCallback!!)
@@ -68,8 +114,8 @@ class MyVpnService : VpnService() {
         try {
             val builder = Builder()
             builder.addAddress("10.0.0.2", 32)
-            builder.addRoute("8.8.8.8", 32) // Split Tunneling
-            builder.setSession("4thGenVPN_AI_Node")
+            builder.addRoute("8.8.8.8", 32)
+            builder.setSession("4thGenVPN")
             builder.setBlocking(true)
 
             vpnInterface = builder.establish()
@@ -85,15 +131,10 @@ class MyVpnService : VpnService() {
     private fun manageTraffic(vpnInterface: ParcelFileDescriptor?) {
         vpnInterface?.fileDescriptor?.let { fd ->
             val inputStream = FileInputStream(fd)
-            val outputStream = FileOutputStream(fd)
             val packet = ByteArray(32767)
-            
             while (isRunning) {
                 try {
-                    val length = inputStream.read(packet)
-                    if (length > 0) {
-                        // AI Packet Processing
-                    }
+                    inputStream.read(packet)
                 } catch (e: Exception) {
                     break
                 }
@@ -104,13 +145,13 @@ class MyVpnService : VpnService() {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel("VPN_CHANNEL_ID", "4th-Gen VPN Status", NotificationManager.IMPORTANCE_LOW)
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
     private fun stopVpn() {
         isRunning = false
+        updateHandler.removeCallbacksAndMessages(null)
         try {
             networkCallback?.let { connectivityManager?.unregisterNetworkCallback(it) }
             vpnInterface?.close()
