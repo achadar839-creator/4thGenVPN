@@ -3,90 +3,80 @@ package com.vpn.gen4
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Intent
 import android.net.VpnService
 import android.os.Build
-import android.os.ParcelFileDescriptor
-import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.wireguard.android.backend.GoBackend
+import com.wireguard.android.backend.Tunnel
+import com.wireguard.config.Config
+import java.io.File
+import java.io.FileInputStream
 
-class MyVpnService : VpnService() {
-    private var vpnInterface: ParcelFileDescriptor? = null
+class MyVpnService : VpnService(), Tunnel {
+    private lateinit var backend: GoBackend
     private var isRunning = false
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val country = intent?.getStringExtra("SELECTED_COUNTRY") ?: "Optimal Server"
-        Log.d("MyVpnService", "Starting VPN connection for: $country")
-        
-        showNotification(country)
+    companion object {
+        const val CHANNEL_ID = "VpnChannel"
+        const val NOTIF_ID = 1
+    }
 
-        if (!isRunning) {
-            isRunning = true
-            Thread {
-                startVpnTunnel(country)
-            }.start()
-        }
+    override fun getName() = "4thGenTunnel"
+
+    override fun onStateChange(newState: Tunnel.State) {}
+
+    override fun onCreate() {
+        super.onCreate()
+        backend = GoBackend(this)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val cc = intent?.getStringExtra("COUNTRY_CODE") ?: "US"
+        startForegroundNotification(cc)
+        startWireGuardTunnel(cc)
         return START_STICKY
     }
 
-    private fun showNotification(country: String) {
-        val channelId = "vpn_channel"
+    private fun startForegroundNotification(country: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "VPN Connection Service",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(channel)
+            val channel = NotificationChannel(CHANNEL_ID, "4th-Gen VPN Service", NotificationManager.IMPORTANCE_LOW)
+            getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
         }
-
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, notificationIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        val notification: Notification = NotificationCompat.Builder(this, channelId)
+        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("4TH-GEN VPN Connected")
-            .setContentText("Securely connected to $country")
+            .setContentText("Tunnel active for server: $country")
             .setSmallIcon(android.R.drawable.ic_lock_lock)
-            .setContentIntent(pendingIntent)
             .build()
-
-        startForeground(1, notification)
+        startForeground(NOTIF_ID, notification)
     }
 
-    private fun startVpnTunnel(country: String) {
+    private fun startWireGuardTunnel(cc: String) {
+        if (isRunning) return
         try {
-            val builder = Builder()
-                .addAddress("10.0.0.2", 32)
-                .addRoute("0.0.0.0", 0)
-                .addDnsServer("8.8.8.8")
-                .setSession("4TH-GEN VPN ($country)")
-                .setMtu(1500)
-
-            vpnInterface = builder.establish()
-            if (vpnInterface != null) {
-                Log.d("MyVpnService", "VPN Interface established successfully for $country")
-            } else {
-                Log.e("MyVpnService", "Failed: vpnInterface is null")
+            val configFile = File(filesDir, "configs/$cc.conf")
+            if (configFile.exists()) {
+                val config = Config.parse(FileInputStream(configFile))
+                backend.setState(this, Tunnel.State.UP, config)
+                isRunning = true
             }
-        } catch (e: Exception) {
-            Log.e("MyVpnService", "Error establishing VPN tunnel", e)
+        } catch(e: Exception) {
+            e.printStackTrace()
+            stopVpn()
         }
+    }
+
+    private fun stopVpn() {
+        if (isRunning) {
+            try { backend.setState(this, Tunnel.State.DOWN, null) } catch(e: Exception) {}
+            isRunning = false
+        }
+        stopForeground(true)
+        stopSelf()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        isRunning = false
-        try {
-            vpnInterface?.close()
-            vpnInterface = null
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        Log.d("MyVpnService", "VPN Service destroyed")
+        stopVpn()
     }
 }

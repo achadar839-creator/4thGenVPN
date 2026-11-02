@@ -1,6 +1,7 @@
 package com.vpn.gen4
 
 import android.content.Intent
+import android.net.VpnService
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -10,7 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-    private var selectedCountry = "⚡ Optimal Server (Gaming)"
+    private var selectedCountry = "🇺🇸 United States"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,46 +22,16 @@ class MainActivity : AppCompatActivity() {
 
         // 140+ शुद्ध वर्किंग और एक्टिव ग्लोबल सर्वर्स की लिस्ट (नॉन-वर्किंग देश हटा दिए गए हैं)
         val countries = arrayOf(
-            "⚡ Optimal Server (Gaming)",
-            "🇦🇱 Albania", "🇩🇿 Algeria", "🇦🇩 Andorra", "🇦🇴 Angola",
-            "🇦🇬 Antigua and Barbuda", "🇦🇷 Argentina", "🇦🇲 Armenia", "🇦🇺 Australia", "🇦🇹 Austria",
-            "🇦🇿 Azerbaijan", "🇧🇸 Bahamas", "🇧🇭 Bahrain", "🇧🇩 Bangladesh", "🇧🇧 Barbados",
-            "🇧🇾 Belarus", "🇧🇪 Belgium", "🇧🇿 Belize", "🇧🇯 Benin", "🇧🇹 Bhutan",
-            "🇧🇴 Bolivia", "🇧🇦 Bosnia and Herzegovina", "🇧🇼 Botswana", "🇧🇷 Brazil", "🇧🇳 Brunei",
-            "🇧🇬 Bulgaria", "🇧🇫 Burkina Faso", "🇧🇮 Burundi", "🇨🇻 Cabo Verde", "🇰🇭 Cambodia",
-            "🇨🇲 Cameroon", "🇨🇦 Canada", "🇨🇫 Central African Republic", "🇹🇩 Chad", "🇨🇱 Chile",
-            "🇨🇳 China", "🇨🇴 Colombia", "🇰🇲 Comoros", "🇨🇬 Congo", "🇨🇷 Costa Rica",
-            "🇭🇷 Croatia", "🇨🇾 Cyprus", "🇨🇿 Czech Republic", "🇩🇰 Denmark",
-            "🇩🇯 Djibouti", "🇩🇲 Dominica", "🇩🇴 Dominican Republic", "🇪🇨 Ecuador", "🇪🇬 Egypt",
-            "🇸🇻 El Salvador", "🇬🇶 Equatorial Guinea", "🇪🇪 Estonia", "🇪🇹 Ethiopia",
-            "🇫🇯 Fiji", "🇫🇮 Finland", "🇫🇷 France", "🇬🇦 Gabon", "🇬🇲 Gambia",
-            "🇬🇪 Georgia", "🇩🇪 Germany", "🇬🇭 Ghana", "🇬🇷 Greece", "🇬🇩 Grenada",
-            "🇬🇹 Guatemala", "🇬🇳 Guinea", "🇬🇼 Guinea-Bissau", "🇬🇾 Guyana", "🇭🇹 Haiti",
-            "🇭🇳 Honduras", "🇭🇰 Hong Kong", "🇭🇺 Hungary", "🇮🇸 Iceland", "🇮🇳 India",
-            "🇮🇩 Indonesia", "🇮🇷 Iran", "🇮🇶 Iraq", "🇮🇪 Ireland", "🇮🇱 Israel",
-            "🇮🇹 Italy", "🇯🇲 Jamaica", "🇯🇵 Japan", "🇯🇴 Jordan", "🇰🇿 Kazakhstan",
-            "🇰🇪 Kenya", "🇰🇮 Kiribati", "🇰🇷 South Korea", "🇰🇼 Kuwait",
-            "🇰🇬 Kyrgyzstan", "🇱🇦 Laos", "🇱🇻 Latvia", "🇱🇧 Lebanon", "🇱🇸 Lesotho",
-            "🇱🇷 Liberia", "🇱🇾 Libya", "🇱🇮 Liechtenstein", "🇱🇹 Lithuania", "🇱🇺 Luxembourg",
-            "🇲🇴 Macau", "🇲🇬 Madagascar", "🇲🇼 Malawi", "🇲🇾 Malaysia", "🇲🇻 Maldives",
-            "🇲🇱 Mali", "🇲🇹 Malta", "🇲🇭 Marshall Islands", "🇲🇷 Mauritania", "🇲🇺 Mauritius",
-            "🇲🇽 Mexico", "🇫🇲 Micronesia", "🇲🇩 Moldova", "🇲🇨 Monaco", "🇲🇳 Mongolia",
-            "🇲🇪 Montenegro", "🇲🇦 Morocco", "🇲🇿 Mozambique", "🇲🇲 Myanmar", "🇳🇦 Namibia",
-            "🇳🇵 Nepal", "🇳🇱 Netherlands", "🇳🇿 New Zealand", "🇳🇮 Nicaragua",
-            "🇳🇪 Niger", "🇳🇬 Nigeria", "🇲🇰 North Macedonia", "🇳🇴 Norway", "🇴🇲 Oman",
-            "🇵🇰 Pakistan", "🇵🇼 Palau", "🇵🇸 Palestine", "🇵🇦 Panama", "🇵🇬 Papua New Guinea",
-            "🇵🇾 Paraguay", "🇵🇪 Peru", "🇵🇭 Philippines", "🇵🇱 Poland", "🇵🇹 Portugal",
-            "🇶🇦 Qatar", "🇷🇴 Romania", "🇷🇺 Russia", "🇷🇼 Rwanda", "🇰🇳 Saint Kitts and Nevis",
-            "🇱🇨 Saint Lucia", "🇻🇨 Saint Vincent and the Grenadines", "🇼🇸 Samoa", "🇸🇲 San Marino", "🇸🇹 Sao Tome and Principe",
-            "🇸🇦 Saudi Arabia", "🇸🇳 Senegal", "🇷🇸 Serbia", "🇸🇨 Seychelles", "🇸🇱 Sierra Leone",
-            "🇸🇬 Singapore", "🇸🇰 Slovakia", "🇸🇮 Slovenia", "🇸🇧 Solomon Islands",
-            "🇿🇦 South Africa", "🇪🇸 Spain", "🇱🇰 Sri Lanka", "🇸🇩 Sudan", "🇸🇷 Suriname",
-            "🇸🇪 Sweden", "🇨🇭 Switzerland", "🇸🇾 Syria", "🇹🇼 Taiwan", "🇹🇯 Tajikistan",
-            "🇹🇿 Tanzania", "🇹🇭 Thailand", "🇹🇱 Timor-Leste", "🇹🇬 Togo", "🇹🇴 Tonga",
-            "🇹🇹 Trinidad and Tobago", "🇹🇳 Tunisia", "🇹🇷 Turkey",
-            "🇺🇬 Uganda", "🇺🇦 Ukraine", "🇦🇪 United Arab Emirates", "🇬🇧 United Kingdom", "🇺🇸 United States",
-            "🇺🇾 Uruguay", "🇺🇿 Uzbekistan", "🇻🇺 Vanuatu", "🇻🇦 Vatican City", "🇻🇪 Venezuela",
-            "🇻🇳 Vietnam", "🇾🇪 Yemen", "🇿🇲 Zambia", "🇿🇼 Zimbabwe"
+            "🇺🇸 United States",
+            "🇯🇵 Japan",
+            "🇩🇪 Germany",
+            "🇸🇬 Singapore",
+            "🇳🇱 Netherlands",
+            "🇨🇦 Canada",
+            "🇬🇧 United Kingdom",
+            "🇨🇭 Switzerland",
+            "🇰🇷 South Korea",
+            "🇦🇺 Australia"
         )
 
         btnSelectCountry.setOnClickListener {
@@ -75,15 +46,104 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnConnect.setOnClickListener {
-            val intent = Intent(this, MyVpnService::class.java).apply {
-                putExtra("SELECTED_COUNTRY", selectedCountry)
+            requestNotificationPermissionThenVpn()
+        }
+    }
+
+    private fun requestNotificationPermissionThenVpn() {
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+            checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                NOTIFICATION_REQUEST_CODE
+            )
+        } else {
+            requestVpnPermission()
+        }
+    }
+
+    private fun requestVpnPermission() {
+        val prepareIntent = VpnService.prepare(this)
+
+        if (prepareIntent != null) {
+            startActivityForResult(prepareIntent, VPN_REQUEST_CODE)
+        } else {
+            startVpnService()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == NOTIFICATION_REQUEST_CODE) {
+            if (grantResults.isEmpty() ||
+                grantResults[0] != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(
+                    this,
+                    "Notification permission denied. VPN may run without drawer notification.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
+            requestVpnPermission()
+        }
+    }
+
+    private fun startVpnService() {
+        val intent = Intent(this, MyVpnService::class.java).apply {
+            putExtra("SELECTED_COUNTRY", selectedCountry)
+        }
+
+        try {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 startForegroundService(intent)
             } else {
                 startService(intent)
             }
-            Toast.makeText(this, "Connecting to $selectedCountry...", Toast.LENGTH_SHORT).show()
+
+            Toast.makeText(
+                this,
+                "Connecting to $selectedCountry...",
+                Toast.LENGTH_SHORT
+            ).show()
+        } catch (e: Exception) {
+            Toast.makeText(
+                this,
+                "VPN start failed: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
         }
+    }
+
+    @Deprecated("Use VPN permission result handling")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == VPN_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                startVpnService()
+            } else {
+                Toast.makeText(
+                    this,
+                    "VPN permission denied",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    companion object {
+        private const val VPN_REQUEST_CODE = 1001
+        private const val NOTIFICATION_REQUEST_CODE = 1002
     }
 }
