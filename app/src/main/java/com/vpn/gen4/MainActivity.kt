@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
         val btn2xBridge = findViewById<Button>(R.id.btn2xBridge)
 
         val configDirPath = "${filesDir.absolutePath}/configs"
-
         val countries = arrayOf("Singapore", "Japan", "Canada", "Switzerland", "Mexico", "Netherlands", "Norway")
         val countryCodes = arrayOf("SG", "JP", "CA", "CH", "MX", "NL", "NO")
 
@@ -42,11 +41,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnConnect.setOnClickListener {
-            val selectedServer = LoadBalancer.getServerByCountry(configDirPath, selectedCountryCode)
+            val selectedFilePath = LoadBalancer.getServerFilePath(configDirPath, selectedCountryCode)
 
-            if (selectedServer != null) {
-                val vpnConfig = VpnEngine.buildConfig(selectedServer)
-                startVpnTunnel(vpnConfig)
+            if (selectedFilePath != null) {
+                val startIntent = Intent(this, MyVpnService::class.java)
+                startIntent.action = "ACTION_CONNECT"
+                startIntent.putExtra("CONFIG_PATH", selectedFilePath)
+                startService(startIntent)
                 Toast.makeText(this, "Connecting to $selectedCountryCode...", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "$selectedCountryCode config missing!", Toast.LENGTH_SHORT).show()
@@ -59,9 +60,5 @@ class MainActivity : AppCompatActivity() {
             startService(stopIntent)
             Toast.makeText(this, "VPN Disconnected", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun startVpnTunnel(config: com.wireguard.config.Config) {
-        // Wireguard logic
     }
 }
