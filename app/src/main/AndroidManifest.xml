@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.vpn.gen4">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- इंटरनेट और VPN की जरूरी परमिशंस -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_VPN" />
 
     <application
         android:allowBackup="true"
         android:icon="@android:drawable/sym_def_app_icon"
-        android:label="4thGenVPN"
+        android:label="4TH-GEN VPN"
+        android:roundIcon="@android:drawable/sym_def_app_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar">
+        android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
         
         <activity
             android:name=".MainActivity"
@@ -23,11 +23,11 @@
             </intent-filter>
         </activity>
 
-        <!-- असली VPN सर्विस का डिक्लेरेशन -->
         <service
             android:name=".MyVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
-            android:exported="true">
+            android:exported="false"
+            android:foregroundServiceType="vpn">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
