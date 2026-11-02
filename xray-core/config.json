@@ -1,0 +1,45 @@
+{
+  "inbounds": [
+    {
+      "port": 10808,
+      "protocol": "socks",
+      "settings": { "udp": true }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "wg-sg",
+      "protocol": "wireguard",
+      "settings": {
+        "secretKey": "0KFB0CYZekSMahO+yfd3RxGckMxgOhDMLCsgQFtq3Vo=",
+        "address": ["10.2.0.2/32"],
+        "peers": [{"publicKey": "AMrYsHq/kc8SLUxR5Z9OXuNCcF9YvsOl9Ch60hc+Q2U=", "endpoint": "149.50.211.134:51820"}]
+      }
+    },
+    {
+      "tag": "wg-jp",
+      "protocol": "wireguard",
+      "settings": {
+        "secretKey": "UGaTPKYHAGYY7rIdF41FdHsDK11dTD+CaUktfGMgXEM=",
+        "address": ["10.2.0.2/32"],
+        "peers": [{"publicKey": "jXayHq4Z5KQC1woRwm6ymLFZot/+158IWDT++u5d2Qc=", "endpoint": "212.102.51.1:51820"}]
+      }
+    }
+  ],
+  "routing": {
+    "balancers": [
+      {
+        "tag": "asia-bridge-balancer",
+        "selector": ["wg-sg", "wg-jp"],
+        "strategy": { "type": "random" }
+      }
+    ],
+    "rules": [
+      {
+        "type": "field",
+        "network": "tcp,udp",
+        "balancerTag": "asia-bridge-balancer"
+      }
+    ]
+  }
+}

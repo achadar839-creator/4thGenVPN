@@ -27,11 +27,20 @@
         android:layout_marginBottom="16dp"/>
 
     <Button
+    <Button
+        android:id="@+id/btn2xBridge"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginBottom="15dp"
+        android:text="🚀 2X ASIA BRIDGE (SG + JP)"
+        android:backgroundTint="#FF5722"
+        android:textColor="#FFFFFF" />
         android:id="@+id/btnConnect"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:text="CONNECT VPN"
         android:backgroundTint="#00FF66"
+    <Button android:id="@+id/btnDisconnect" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="DISCONNECT VPN" android:backgroundTint="#FF3333" android:textColor="#FFFFFF" android:textStyle="bold" />
         android:textColor="#000000"
         android:textStyle="bold"
         android:textSize="18sp"/>
