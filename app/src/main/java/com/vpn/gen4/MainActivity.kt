@@ -1,85 +1,89 @@
 package com.vpn.gen4
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.net.VpnService
 import android.os.Bundle
-import android.widget.TextView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ListView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 
 class MainActivity : AppCompatActivity() {
-    private var isConnected = false
-    private val servers = arrayOf("Optimal Server (Auto)", "🇺🇸 United States", "🇬🇧 United Kingdom", "🇯🇵 Japan", "🇸🇬 Singapore", "🇩🇪 Germany", "🇮🇳 India")
+    private var selectedCountry = "Optimal Server (Gaming)"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        WgEngine.init(applicationContext)
 
-        val btnSelectServer = findViewById<CardView>(R.id.btnSelectServer)
-        val tvCurrentServer = findViewById<TextView>(R.id.tvCurrentServer)
-        val btnConnect = findViewById<CardView>(R.id.btnConnect)
-        val btnSettings = findViewById<TextView>(R.id.btnSettings)
+        val btnConnect = findViewById<Button>(R.id.btnConnect)
+        val btnSelectCountry = findViewById<Button>(R.id.btnSelectCountry)
 
-        btnSettings.setOnClickListener {
-            val builder = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-            builder.setTitle("Settings").setMessage("Advanced 4th-Gen features coming soon!")
-            builder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }.show()
-        }
+        // दुनिया भर के 190 देशों की पूरी ग्लोबल लिस्ट
+        val countries = arrayOf(
+            "⚡ Optimal Server (Gaming)",
+            "🇦🇫 Afghanistan", "🇦🇱 Albania", "🇩🇿 Algeria", "🇦🇩 Andorra", "🇦🇴 Angola",
+            "🇦🇬 Antigua and Barbuda", "🇦🇷 Argentina", "🇦🇲 Armenia", "🇦🇺 Australia", "🇦🇹 Austria",
+            "🇦🇿 Azerbaijan", "🇧🇸 Bahamas", "🇧🇭 Bahrain", "🇧🇩 Bangladesh", "🇧🇧 Barbados",
+            "🇧🇾 Belarus", "🇧🇪 Belgium", "🇧🇿 Belize", "🇧🇯 Benin", "🇧🇹 Bhutan",
+            "🇧🇴 Bolivia", "🇧🇦 Bosnia and Herzegovina", "🇧🇼 Botswana", "🇧🇷 Brazil", "🇧🇳 Brunei",
+            "🇧🇬 Bulgaria", "🇧🇫 Burkina Faso", "🇧🇮 Burundi", "🇨🇻 Cabor Verde", "🇰🇭 Cambodia",
+            "🇨🇲 Cameroon", "🇨🇦 Canada", "🇨🇫 Central African Republic", "🇹🇩 Chad", "🇨🇱 Chile",
+            "🇨🇳 China", "🇨🇴 Colombia", "🇰🇲 Comoros", "🇨🇬 Congo", "🇨🇷 Costa Rica",
+            "🇭🇷 Croatia", "🇨🇺 Cuba", "🇨🇾 Cyprus", "🇨🇿 Czech Republic", "🇩🇰 Denmark",
+            "🇩🇯 Djibouti", "🇩🇲 Dominica", "🇩🇴 Dominican Republic", "🇪🇨 Ecuador", "🇪🇬 Egypt",
+            "🇸🇻 El Salvador", "🇬🇶 Equatorial Guinea", "🇪🇷 Eritrea", "🇪🇪 Estonia", "🇪🇹 Ethiopia",
+            "🇫🇯 Fiji", "🇫🇮 Finland", "🇫🇷 France", "🇬🇦 Gabon", "🇬🇲 Gambia",
+            "🇬🇪 Georgia", "🇩🇪 Germany", "🇬🇭 Ghana", "🇬🇷 Greece", "🇬🇩 Grenada",
+            "🇬🇹 Guatemala", "🇬🇳 Guinea", "🇬🇼 Guinea-Bissau", "🇬🇾 Guyana", "🇭🇹 Haiti",
+            "🇭🇳 Honduras", "🇭🇰 Hong Kong", "🇭🇺 Hungary", "🇮🇸 Iceland", "🇮🇳 India",
+            "🇮🇩 Indonesia", "🇮🇷 Iran", "🇮🇶 Iraq", "🇮🇪 Ireland", "🇮🇱 Israel",
+            "🇮🇹 Italy", "🇯🇲 Jamaica", "🇯🇵 Japan", "🇯🇴 Jordan", "🇰🇿 Kazakhstan",
+            "🇰🇪 Kenya", "🇰🇮 Kiribati", "🇰🇵 North Korea", "🇰🇷 South Korea", "🇰🇼 Kuwait",
+            "🇰🇬 Kyrgyzstan", "🇱🇦 Laos", "🇱🇻 Latvia", "🇱🇧 Lebanon", "🇱🇸 Lesotho",
+            "🇱🇷 Liberia", "🇱🇾 Libya", "🇱🇮 Liechtenstein", "🇱🇹 Lithuania", "🇱🇺 Luxembourg",
+            "🇲🇴 Macau", "🇲🇬 Madagascar", "🇲🇼 Malawi", "🇲🇾 Malaysia", "🇲🇻 Maldives",
+            "🇲🇱 Mali", "🇲🇹 Malta", "🇲🇭 Marshall Islands", "🇲🇷 Mauritania", "🇲🇺 Mauritius",
+            "🇲🇽 Mexico", "🇫🇲 Micronesia", "🇲🇩 Moldova", "🇲🇨 Monaco", "🇲🇳 Mongolia",
+            "🇲🇪 Montenegro", "🇲🇦 Morocco", "🇲🇿 Mozambique", "🇲🇲 Myanmar", "🇳🇦 Namibia",
+            "🇳🇷 Nauru", "🇳🇵 Nepal", "🇳🇱 Netherlands", "🇳🇿 New Zealand", "🇳🇮 Nicaragua",
+            "🇳🇪 Niger", "🇳🇬 Nigeria", "🇲🇰 North Macedonia", "🇳🇴 Norway", "🇴🇲 Oman",
+            "🇵🇰 Pakistan", "🇵🇼 Palau", "🇵🇸 Palestine", "🇵🇦 Panama", "🇵🇬 Papua New Guinea",
+            "🇵🇾 Paraguay", "🇵🇪 Peru", "🇵🇭 Philippines", "🇵🇱 Poland", "🇵🇹 Portugal",
+            "🇶🇦 Qatar", "🇷🇴 Romania", "🇷🇺 Russia", "🇷🇼 Rwanda", "🇰🇳 Saint Kitts and Nevis",
+            "🇱🇨 Saint Lucia", "🇻🇨 Saint Vincent and the Grenadines", "🇼🇸 Samoa", "🇸🇲 San Marino", "🇸🇹 Sao Tome and Principe",
+            "🇸🇦 Saudi Arabia", "🇸🇳 Senegal", "🇸🇷 Serbia", "🇸🇨 Seychelles", "🇸🇱 Sierra Leone",
+            "🇸🇬 Singapore", "🇸🇰 Slovakia", "🇸🇮 Slovenia", "🇸🇧 Solomon Islands", "索 Somalia",
+            "🇿🇦 South Africa", "🇪🇸 Spain", "🇱🇰 Sri Lanka", "🇸🇩 Sudan", "🇸🇷 Suriname",
+            "🇸🇪 Sweden", "🇨🇭 Switzerland", "🇸🇾 Syria", "🇹🇼 Taiwan", "🇹🇯 Tajikistan",
+            "🇹🇿 Tanzania", "🇹🇭 Thailand", "🇹🇱 Timor-Leste", "🇹🇬 Togo", "🇹🇴 Tonga",
+            "🇹🇹 Trinidad and Tobago", "🇹🇳 Tunisia", "🇹🇷 Turkey", "🇹🇲 Turkmenistan", "🇹🇻 Tuvalu",
+            "🇺🇬 Uganda", "🇺🇦 Ukraine", "🇦🇪 United Arab Emirates", "🇬🇧 United Kingdom", "🇺🇸 United States",
+            "🇺🇾 Uruguay", "🇺🇿 Uzbekistan", "🇻🇺 Vanuatu", "🇻🇦 Vatican City", "🇻🇪 Venezuela",
+            "🇻🇳 Vietnam", "🇾🇪 Yemen", "🇿🇲 Zambia", "🇿🇼 Zimbabwe"
+        )
 
-        btnSelectServer.setOnClickListener {
-            val builder = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-            builder.setTitle("Select Global Node")
-            builder.setItems(servers) { _, which ->
-                tvCurrentServer.text = servers[which]
-                tvCurrentServer.setTextColor(Color.parseColor("#39FF14"))
+        btnSelectCountry.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Select from 190+ Global Countries")
+            builder.setItems(countries) { _, which ->
+                selectedCountry = countries[which]
+                btnSelectCountry.text = selectedCountry
+                Toast.makeText(this, "Selected: $selectedCountry", Toast.LENGTH_SHORT).show()
             }
             builder.show()
         }
 
         btnConnect.setOnClickListener {
-            if (!isConnected) {
-                val intent = VpnService.prepare(this)
-                if (intent != null) {
-                    startActivityForResult(intent, 1)
-                } else {
-                    startVpn(tvCurrentServer.text.toString())
-                }
-            } else {
-                stopVpn()
+            val intent = Intent(this, MyVpnService::class.java).apply {
+                putExtra("SELECTED_COUNTRY", selectedCountry)
             }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+            Toast.makeText(this, "Connecting to $selectedCountry...", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            val tvCurrentServer = findViewById<TextView>(R.id.tvCurrentServer)
-            startVpn(tvCurrentServer.text.toString())
-        }
-    }
-
-    private fun startVpn(selectedCountry: String) {
-        isConnected = true
-        val vpnIntent = Intent(this, MyVpnService::class.java).apply {
-            putExtra("SELECTED_COUNTRY", selectedCountry)
-        }
-        startService(vpnIntent)
-        
-        findViewById<TextView>(R.id.tvConnectState).text = "CONNECTED"
-        findViewById<TextView>(R.id.tvConnectState).setTextColor(Color.parseColor("#39FF14"))
-    }
-
-    private fun stopVpn() {
-        isConnected = false
-        val vpnIntent = Intent(this, MyVpnService::class.java).apply { action = "STOP" }
-        startService(vpnIntent)
-
-        findViewById<TextView>(R.id.tvConnectState).text = "CONNECT"
-        findViewById<TextView>(R.id.tvConnectState).setTextColor(Color.WHITE)
     }
 }
