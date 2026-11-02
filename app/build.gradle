@@ -14,6 +14,6 @@ android {
     }
 }
 dependencies {
-    implementation "com.wireguard.android:tunnel:1.0.20211019"
+    implementation "com.wireguard.android:tunnel:1.0.20230427"
     implementation "androidx.core:core-ktx:1.9.0"
 }
