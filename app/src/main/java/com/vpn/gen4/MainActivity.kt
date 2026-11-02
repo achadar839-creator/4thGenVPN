@@ -127,14 +127,13 @@ class MainActivity : AppCompatActivity() {
         resultCode: Int,
         data: Intent?
     ) {
-        super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == VPN_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == android.app.Activity.RESULT_OK) {
                 startVpnService()
             } else {
                 Toast.makeText(
-                    this,
+                    this@MainActivity,
                     "VPN permission denied",
                     Toast.LENGTH_LONG
                 ).show()
